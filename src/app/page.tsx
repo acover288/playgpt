@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ChatCompletionRequestMessage, ChatCompletionResponseMessage, Configuration, OpenAIApi } from 'openai';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
@@ -133,6 +133,7 @@ const ChatPage: React.FC = () => {
   const [cost, setCost] = useState(0);
   const [chatHistory, setChatHistory] = useState<ChatMessageType[]>([]);
   const [loading, setLoading] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const newApiKey = localStorage.getItem('apiKey');
@@ -152,6 +153,13 @@ const ChatPage: React.FC = () => {
       setOpenAI(_openai);
     }
   }, [apiKey]);
+
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.scrollTo(0, ref.current.scrollHeight);
+    }
+
+  }, [chatHistory.length]);
 
   const handleModelChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedModel(event.target.value);
@@ -229,7 +237,6 @@ const ChatPage: React.FC = () => {
 
   return (
     <div className="container flex flex-col p-8 dark:bg-gray-800 h-screen">
-      <h1 className="text-3xl font-bold mb-4 dark:text-white">GPT-4 Chat API</h1>
       <div className="flex items-center mb-4 dark:text-white">
         <div className="mr-4">
           Total cost: ${cost.toFixed(5)} USD
@@ -247,7 +254,7 @@ const ChatPage: React.FC = () => {
         </select>
         <ApiKeyInput apiKey={apiKey} onApiKeyChange={setApiKey} />
       </div>
-      <div id="chat-box" className="flex-grow border border-gray-300 rounded p-4 mb-4 h-60 overflow-auto dark:bg-gray-900">
+      <div id="chat-box" ref={ref} className="flex-grow border border-gray-300 rounded p-4 mb-4 h-60 overflow-auto dark:bg-gray-900">
         {chatHistory.map((message, index) => (<Message key={index} message={message} />))}
       </div>
       <div className="input-area">
